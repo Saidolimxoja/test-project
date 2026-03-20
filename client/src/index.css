@@ -1,4 +1,8 @@
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 body {
   font-family: system-ui, sans-serif;
@@ -40,14 +44,18 @@ body {
   margin-bottom: 8px;
   outline: none;
 }
-.search-input:focus { border-color: #6366f1; }
+.search-input:focus {
+  border-color: #6366f1;
+}
 
 .add-row {
   display: flex;
   gap: 8px;
   margin-bottom: 8px;
 }
-.add-row .search-input { margin-bottom: 0; }
+.add-row .search-input {
+  margin-bottom: 0;
+}
 
 .btn {
   padding: 8px 14px;
@@ -59,7 +67,9 @@ body {
   font-size: 14px;
   white-space: nowrap;
 }
-.btn:hover { background: #4f46e5; }
+.btn:hover {
+  background: #4f46e5;
+}
 
 .list {
   flex: 1;
@@ -81,15 +91,21 @@ body {
   transition: background 0.15s;
   user-select: none;
 }
-.list-item:hover { background: #eef2ff; }
+.list-item:hover {
+  background: #eef2ff;
+}
 
 .item-action {
   font-size: 12px;
   color: #6366f1;
 }
-.item-action.remove { color: #ef4444; }
+.item-action.remove {
+  color: #ef4444;
+}
 
-.draggable { cursor: default; }
+.draggable {
+  cursor: default;
+}
 
 .drag-handle {
   cursor: grab;
@@ -98,7 +114,9 @@ body {
   margin-right: 10px;
   line-height: 1;
 }
-.drag-handle:active { cursor: grabbing; }
+.drag-handle:active {
+  cursor: grabbing;
+}
 
 .loader {
   text-align: center;
