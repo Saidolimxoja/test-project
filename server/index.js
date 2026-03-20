@@ -7,8 +7,8 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Отдаём собранный React только если папка dist существует
-const fs = require('fs');
+
+
 const clientDist = path.join(__dirname, '../client/dist');
 if (fs.existsSync(clientDist)) {
    app.use(express.static(clientDist));
