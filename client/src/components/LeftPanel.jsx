@@ -64,10 +64,17 @@ export default function LeftPanel({ reloadRef, onSelect }) {
 
   async function handleAddCustom() {
     const id = parseInt(newId);
-    if (!id || isNaN(id)) return;
-    addQueue.enqueue(id);
+    if (!id || isNaN(id) || id <= 0) return;
+
+    // Сразу показываем в списке локально
+    setItems((prev) => {
+      if (prev.find((i) => i.id === id)) return prev; // уже есть
+      return [{ id }, ...prev];
+    });
     setNewId("");
-    alert(`ID ${id} добавлен в очередь (отправится через ~10 сек)`);
+
+    // В фон отправляем на сервер через очередь (батч раз в 10с)
+    addQueue.enqueue(id);
   }
 
   return (
