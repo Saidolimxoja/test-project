@@ -3,7 +3,6 @@ import { fetchItems, selectItem, addQueue } from "../api";
 
 export default function LeftPanel({ reloadRef, onSelect }) {
   const [items, setItems] = useState([]);
-  const [cursor, setCursor] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [q, setQ] = useState("");
@@ -15,7 +14,7 @@ export default function LeftPanel({ reloadRef, onSelect }) {
 
   const load = useCallback(
     async (reset = false) => {
-      if (loadingRef.current) return;
+      if (!reset && loadingRef.current) return;
       loadingRef.current = true;
       setLoading(true);
 
@@ -24,7 +23,6 @@ export default function LeftPanel({ reloadRef, onSelect }) {
 
       setItems((prev) => (reset ? data.items : [...prev, ...data.items]));
       cursorRef.current = cur + data.items.length;
-      setCursor(cursorRef.current);
       setHasMore(data.items.length === 20);
 
       loadingRef.current = false;
@@ -33,10 +31,18 @@ export default function LeftPanel({ reloadRef, onSelect }) {
     [q],
   );
 
+  // Регистрируем reload — ПОСЛЕ объявления load
+  useEffect(() => {
+    reloadRef.current = () => {
+      cursorRef.current = 0;
+      load(true);
+    };
+  }, [load, reloadRef]);
+
   useEffect(() => {
     cursorRef.current = 0;
     load(true);
-  }, [q]);
+  }, [q]); // eslint-disable-line
 
   useEffect(() => {
     const el = loaderRef.current;

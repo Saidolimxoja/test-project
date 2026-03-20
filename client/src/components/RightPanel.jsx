@@ -15,9 +15,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { fetchSelected, deselectItem, reorderItems } from "../api";
 
-// Один элемнет в списке выбраннах
 function SortableItem({ item, onDeselect }) {
-  // useSortable — хук от @dnd-kit, даёт атрибуты для drag&drop
   const {
     attributes,
     listeners,
@@ -26,16 +24,13 @@ function SortableItem({ item, onDeselect }) {
     transition,
     isDragging,
   } = useSortable({ id: item.id });
-
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
   };
-
   return (
     <div ref={setNodeRef} style={style} className="list-item draggable">
-      {/* Ручка для перетаскивания */}
       <span className="drag-handle" {...attributes} {...listeners}>
         ⠿
       </span>
@@ -47,29 +42,22 @@ function SortableItem({ item, onDeselect }) {
   );
 }
 
-// Правая панель
 export default function RightPanel({ reloadRef, onDeselect: notifyParent }) {
   const [items, setItems] = useState([]);
-  const [cursor, setCursor] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [q, setQ] = useState("");
+
   const loaderRef = useRef(null);
   const loadingRef = useRef(false);
   const cursorRef = useRef(0);
 
-  useEffect(() => {
-    reloadRef.current = () => {
-      cursorRef.current = 0;
-      loadMore(true);
-    };
-  }, [loadMore, reloadRef]);
-
   const sensors = useSensors(useSensor(PointerSensor));
 
+  // loadMore объявлен ДО useEffect который его использует
   const loadMore = useCallback(
     async (reset = false) => {
-      if (loadingRef.current) return;
+      if (!reset && loadingRef.current) return;
       loadingRef.current = true;
       setLoading(true);
 
@@ -78,7 +66,6 @@ export default function RightPanel({ reloadRef, onDeselect: notifyParent }) {
 
       setItems((prev) => (reset ? data.items : [...prev, ...data.items]));
       cursorRef.current = cur + data.items.length;
-      setCursor(cursorRef.current);
       setHasMore(data.items.length === 20);
 
       loadingRef.current = false;
@@ -86,6 +73,14 @@ export default function RightPanel({ reloadRef, onDeselect: notifyParent }) {
     },
     [q],
   );
+
+  // Регистрируем reload — ПОСЛЕ объявления loadMore
+  useEffect(() => {
+    reloadRef.current = () => {
+      cursorRef.current = 0;
+      loadMore(true);
+    };
+  }, [loadMore, reloadRef]);
 
   useEffect(() => {
     cursorRef.current = 0;
@@ -111,17 +106,13 @@ export default function RightPanel({ reloadRef, onDeselect: notifyParent }) {
     notifyParent();
   }
 
-  // Drag end — обновляем порядок локально и отправляем на сервер
   async function handleDragEnd(event) {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-
     setItems((prev) => {
       const oldIdx = prev.findIndex((i) => i.id === active.id);
       const newIdx = prev.findIndex((i) => i.id === over.id);
       const reordered = arrayMove(prev, oldIdx, newIdx);
-
-      // Отправляем новый порядок на сервер
       reorderItems(reordered.map((i) => i.id));
       return reordered;
     });
@@ -130,14 +121,12 @@ export default function RightPanel({ reloadRef, onDeselect: notifyParent }) {
   return (
     <div className="panel">
       <h2 className="panel-title">Выбранные</h2>
-
       <input
         className="search-input"
         placeholder="Фильтр по ID..."
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
-
       <div className="list">
         <DndContext
           sensors={sensors}
@@ -157,7 +146,6 @@ export default function RightPanel({ reloadRef, onDeselect: notifyParent }) {
             ))}
           </SortableContext>
         </DndContext>
-
         {hasMore && (
           <div ref={loaderRef} className="loader">
             {loading ? "Загрузка..." : ""}

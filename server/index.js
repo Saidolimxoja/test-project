@@ -1,15 +1,20 @@
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
+const express = require("express");
+const cors = require("cors");
+const path = require("path");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Отдаём собранный React (папка client/dist) как статику
-const clientDist = path.join(__dirname, '../client/dist');
-app.use(express.static(clientDist));
-
+// Отдаём собранный React только если папка dist существует
+const fs = require("fs");
+const clientDist = path.join(__dirname, "../client/dist");
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get("/{*path}", (req, res) => {
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
+}
 // ─── In-memory store ───────────────────────────────────────────────
 const TOTAL = 1_000_000;
 
@@ -41,10 +46,10 @@ setInterval(flushAddQueue, 10_000);
 
 // GET /api/items?cursor=0&limit=20&q=
 // Возвращает элементы из левой панели (не выбранные), с пагинацией
-app.get('/api/items', (req, res) => {
+app.get("/api/items", (req, res) => {
   const cursor = parseInt(req.query.cursor) || 0;
-  const limit  = parseInt(req.query.limit)  || 20;
-  const q      = req.query.q?.trim() || '';
+  const limit = parseInt(req.query.limit) || 20;
+  const q = req.query.q?.trim() || "";
 
   const selectedSet = new Set(selectedIds);
 
@@ -64,24 +69,31 @@ app.get('/api/items', (req, res) => {
     idx++;
   }
 
-  res.json({ items: filtered.map(id => ({ id })), nextCursor: cursor + filtered.length });
+  res.json({
+    items: filtered.map((id) => ({ id })),
+    nextCursor: cursor + filtered.length,
+  });
 });
 
 // GET /api/selected — правая панель
-app.get('/api/selected', (req, res) => {
+app.get("/api/selected", (req, res) => {
   const cursor = parseInt(req.query.cursor) || 0;
-  const limit  = parseInt(req.query.limit)  || 20;
-  const q      = req.query.q?.trim() || '';
+  const limit = parseInt(req.query.limit) || 20;
+  const q = req.query.q?.trim() || "";
 
   let list = selectedIds;
-  if (q) list = list.filter(id => String(id).includes(q));
+  if (q) list = list.filter((id) => String(id).includes(q));
 
   const page = list.slice(cursor, cursor + limit);
-  res.json({ items: page.map(id => ({ id })), nextCursor: cursor + page.length, total: list.length });
+  res.json({
+    items: page.map((id) => ({ id })),
+    nextCursor: cursor + page.length,
+    total: list.length,
+  });
 });
 
 // POST /api/select — добавить элемент в выбранные
-app.post('/api/select', (req, res) => {
+app.post("/api/select", (req, res) => {
   const { id } = req.body;
   if (!id || selectedIds.includes(id)) return res.json({ ok: true });
   selectedIds.push(id);
@@ -89,33 +101,30 @@ app.post('/api/select', (req, res) => {
 });
 
 // POST /api/deselect — убрать из выбранных
-app.post('/api/deselect', (req, res) => {
+app.post("/api/deselect", (req, res) => {
   const { id } = req.body;
-  selectedIds = selectedIds.filter(x => x !== id);
+  selectedIds = selectedIds.filter((x) => x !== id);
   res.json({ ok: true });
 });
 
 // POST /api/reorder — сохранить новый порядок после drag&drop
-app.post('/api/reorder', (req, res) => {
+app.post("/api/reorder", (req, res) => {
   const { orderedIds } = req.body;
-  if (!Array.isArray(orderedIds)) return res.status(400).json({ error: 'bad input' });
+  if (!Array.isArray(orderedIds))
+    return res.status(400).json({ error: "bad input" });
   selectedIds = orderedIds;
   res.json({ ok: true });
 });
 
 // POST /api/items/batch — batch добавление кастомных ID
-app.post('/api/items/batch', (req, res) => {
+app.post("/api/items/batch", (req, res) => {
   const { items } = req.body; // [{ id }, ...]
-  if (!Array.isArray(items)) return res.status(400).json({ error: 'bad input' });
+  if (!Array.isArray(items))
+    return res.status(400).json({ error: "bad input" });
   for (const { id } of items) {
     if (id != null) pendingAdd.set(id, true); // дедуп через Map
   }
   res.json({ ok: true, queued: items.length });
-});
-
-// Все остальные маршруты → отдаём index.html (React Router SPA)
-app.get('/{*path}', (req, res) => {
-  res.sendFile(path.join(clientDist, 'index.html'));
 });
 
 // ─── Start ──────────────────────────────────────────────────────────
