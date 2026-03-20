@@ -1,134 +1,134 @@
 * {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+   box-sizing: border-box;
+   margin: 0;
+   padding: 0;
 }
 
 body {
-  font-family: system-ui, sans-serif;
-  background: #f5f5f5;
-  color: #222;
+   font-family: system-ui, sans-serif;
+   background: #f5f5f5;
+   color: #222;
 }
 
 .app-layout {
-  display: flex;
-  gap: 16px;
-  padding: 24px;
-  height: 100vh;
+   display: flex;
+   gap: 16px;
+   padding: 24px;
+   height: 100vh;
 }
 
 .panel {
-  flex: 1;
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e0e0e0;
-  display: flex;
-  flex-direction: column;
-  padding: 16px;
-  overflow: hidden;
+   flex: 1;
+   background: #fff;
+   border-radius: 12px;
+   border: 1px solid #e0e0e0;
+   display: flex;
+   flex-direction: column;
+   padding: 16px;
+   overflow: hidden;
 }
 
 .panel-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: #333;
+   font-size: 16px;
+   font-weight: 600;
+   margin-bottom: 12px;
+   color: #333;
 }
 
 .search-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  font-size: 14px;
-  margin-bottom: 8px;
-  outline: none;
+   width: 100%;
+   padding: 8px 12px;
+   border: 1px solid #ddd;
+   border-radius: 8px;
+   font-size: 14px;
+   margin-bottom: 8px;
+   outline: none;
 }
 .search-input:focus {
-  border-color: #6366f1;
+   border-color: #6366f1;
 }
 
 .add-row {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
+   display: flex;
+   gap: 8px;
+   margin-bottom: 8px;
 }
 .add-row .search-input {
-  margin-bottom: 0;
+   margin-bottom: 0;
 }
 
 .btn {
-  padding: 8px 14px;
-  background: #6366f1;
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  white-space: nowrap;
+   padding: 8px 14px;
+   background: #6366f1;
+   color: #fff;
+   border: none;
+   border-radius: 8px;
+   cursor: pointer;
+   font-size: 14px;
+   white-space: nowrap;
 }
 .btn:hover {
-  background: #4f46e5;
+   background: #4f46e5;
 }
 
 .list {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+   flex: 1;
+   overflow-y: auto;
+   display: flex;
+   flex-direction: column;
+   gap: 4px;
 }
 
 .list-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 12px;
-  border-radius: 8px;
-  background: #f8f8f8;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.15s;
-  user-select: none;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+   padding: 10px 12px;
+   border-radius: 8px;
+   background: #f8f8f8;
+   cursor: pointer;
+   font-size: 14px;
+   transition: background 0.15s;
+   user-select: none;
 }
 .list-item:hover {
-  background: #eef2ff;
+   background: #eef2ff;
 }
 
 .item-action {
-  font-size: 12px;
-  color: #6366f1;
+   font-size: 12px;
+   color: #6366f1;
 }
 .item-action.remove {
-  color: #ef4444;
+   color: #ef4444;
 }
 
 .draggable {
-  cursor: default;
+   cursor: default;
 }
 
 .drag-handle {
-  cursor: grab;
-  color: #aaa;
-  font-size: 18px;
-  margin-right: 10px;
-  line-height: 1;
+   cursor: grab;
+   color: #aaa;
+   font-size: 18px;
+   margin-right: 10px;
+   line-height: 1;
 }
 .drag-handle:active {
-  cursor: grabbing;
+   cursor: grabbing;
 }
 
 .loader {
-  text-align: center;
-  padding: 12px;
-  font-size: 13px;
-  color: #aaa;
-  min-height: 40px;
+   text-align: center;
+   padding: 12px;
+   font-size: 13px;
+   color: #aaa;
+   min-height: 40px;
 }
 
 .empty {
-  text-align: center;
-  padding: 40px 0;
-  color: #aaa;
-  font-size: 14px;
+   text-align: center;
+   padding: 40px 0;
+   color: #aaa;
+   font-size: 14px;
 }

@@ -1,19 +1,20 @@
-const express = require("express");
-const cors = require("cors");
-const path = require("path");
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // Отдаём собранный React только если папка dist существует
-const fs = require("fs");
-const clientDist = path.join(__dirname, "../client/dist");
+const fs = require('fs');
+const clientDist = path.join(__dirname, '../client/dist');
 if (fs.existsSync(clientDist)) {
-  app.use(express.static(clientDist));
-  app.get("/{*path}", (req, res) => {
-    res.sendFile(path.join(clientDist, "index.html"));
-  });
+   app.use(express.static(clientDist));
+   app.get('/{*path}', (req, res) => {
+      res.sendFile(path.join(clientDist, 'index.html'));
+   });
 }
 // ─── In-memory store ───────────────────────────────────────────────
 const TOTAL = 1_000_000;
@@ -31,14 +32,14 @@ const addedCustomIds = new Set(allIds); // сразу включаем базо�
 let pendingAdd = new Map(); // id → true
 
 function flushAddQueue() {
-  if (!pendingAdd.size) return;
-  for (const [id] of pendingAdd) {
-    if (!addedCustomIds.has(id)) {
-      allIds.add(id);
-      addedCustomIds.add(id);
-    }
-  }
-  pendingAdd.clear();
+   if (!pendingAdd.size) return;
+   for (const [id] of pendingAdd) {
+      if (!addedCustomIds.has(id)) {
+         allIds.add(id);
+         addedCustomIds.add(id);
+      }
+   }
+   pendingAdd.clear();
 }
 setInterval(flushAddQueue, 10_000);
 
@@ -46,87 +47,86 @@ setInterval(flushAddQueue, 10_000);
 
 // GET /api/items?cursor=0&limit=20&q=
 // Возвращает элементы из левой панели (не выбранные), с пагинацией
-app.get("/api/items", (req, res) => {
-  const cursor = parseInt(req.query.cursor) || 0;
-  const limit = parseInt(req.query.limit) || 20;
-  const q = req.query.q?.trim() || "";
+app.get('/api/items', (req, res) => {
+   const cursor = parseInt(req.query.cursor) || 0;
+   const limit = parseInt(req.query.limit) || 20;
+   const q = req.query.q?.trim() || '';
 
-  const selectedSet = new Set(selectedIds);
+   const selectedSet = new Set(selectedIds);
 
-  // Генерируем виртуальный список: все ID кроме выбранных
-  // Фильтруем по q если есть
-  const filtered = [];
-  let idx = 0;
+   // Генерируем виртуальный список: все ID кроме выбранных
+   // Фильтруем по q если есть
+   const filtered = [];
+   let idx = 0;
 
-  for (const id of allIds) {
-    if (selectedSet.has(id)) continue;
-    if (q && !String(id).includes(q)) continue;
+   for (const id of allIds) {
+      if (selectedSet.has(id)) continue;
+      if (q && !String(id).includes(q)) continue;
 
-    if (idx >= cursor && filtered.length < limit) {
-      filtered.push(id);
-    }
-    if (filtered.length === limit) break;
-    idx++;
-  }
+      if (idx >= cursor && filtered.length < limit) {
+         filtered.push(id);
+      }
+      if (filtered.length === limit) break;
+      idx++;
+   }
 
-  res.json({
-    items: filtered.map((id) => ({ id })),
-    nextCursor: cursor + filtered.length,
-  });
+   res.json({
+      items: filtered.map((id) => ({ id })),
+      nextCursor: cursor + filtered.length,
+   });
 });
 
 // GET /api/selected — правая панель
-app.get("/api/selected", (req, res) => {
-  const cursor = parseInt(req.query.cursor) || 0;
-  const limit = parseInt(req.query.limit) || 20;
-  const q = req.query.q?.trim() || "";
+app.get('/api/selected', (req, res) => {
+   const cursor = parseInt(req.query.cursor) || 0;
+   const limit = parseInt(req.query.limit) || 20;
+   const q = req.query.q?.trim() || '';
 
-  let list = selectedIds;
-  if (q) list = list.filter((id) => String(id).includes(q));
+   let list = selectedIds;
+   if (q) list = list.filter((id) => String(id).includes(q));
 
-  const page = list.slice(cursor, cursor + limit);
-  res.json({
-    items: page.map((id) => ({ id })),
-    nextCursor: cursor + page.length,
-    total: list.length,
-  });
+   const page = list.slice(cursor, cursor + limit);
+   res.json({
+      items: page.map((id) => ({ id })),
+      nextCursor: cursor + page.length,
+      total: list.length,
+   });
 });
 
 // POST /api/select — добавить элемент в выбранные
-app.post("/api/select", (req, res) => {
-  const { id } = req.body;
-  if (!id || selectedIds.includes(id)) return res.json({ ok: true });
-  selectedIds.push(id);
-  res.json({ ok: true });
+app.post('/api/select', (req, res) => {
+   const { id } = req.body;
+   if (!id || selectedIds.includes(id)) return res.json({ ok: true });
+   selectedIds.push(id);
+   res.json({ ok: true });
 });
 
 // POST /api/deselect — убрать из выбранных
-app.post("/api/deselect", (req, res) => {
-  const { id } = req.body;
-  selectedIds = selectedIds.filter((x) => x !== id);
-  res.json({ ok: true });
+app.post('/api/deselect', (req, res) => {
+   const { id } = req.body;
+   selectedIds = selectedIds.filter((x) => x !== id);
+   res.json({ ok: true });
 });
 
 // POST /api/reorder — сохранить новый порядок после drag&drop
-app.post("/api/reorder", (req, res) => {
-  const { orderedIds } = req.body;
-  if (!Array.isArray(orderedIds))
-    return res.status(400).json({ error: "bad input" });
-  selectedIds = orderedIds;
-  res.json({ ok: true });
+app.post('/api/reorder', (req, res) => {
+   const { orderedIds } = req.body;
+   if (!Array.isArray(orderedIds))
+      return res.status(400).json({ error: 'bad input' });
+   selectedIds = orderedIds;
+   res.json({ ok: true });
 });
 
 // POST /api/items/batch — batch добавление кастомных ID
-app.post("/api/items/batch", (req, res) => {
-  const { items } = req.body; // [{ id }, ...]
-  if (!Array.isArray(items))
-    return res.status(400).json({ error: "bad input" });
-  for (const { id } of items) {
-    if (id != null) pendingAdd.set(id, true); // дедуп через Map
-  }
-  res.json({ ok: true, queued: items.length });
+app.post('/api/items/batch', (req, res) => {
+   const { items } = req.body; // [{ id }, ...]
+   if (!Array.isArray(items))
+      return res.status(400).json({ error: 'bad input' });
+   for (const { id } of items) {
+      if (id != null) pendingAdd.set(id, true); // дедуп через Map
+   }
+   res.json({ ok: true, queued: items.length });
 });
 
-// ─── Start ──────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 3001;
+const PORT = 3001;
 app.listen(PORT, () => console.log(`Server running on :${PORT}`));
