@@ -1,27 +1,22 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import LeftPanel from './components/LeftPanel'
 import RightPanel from './components/RightPanel'
 
-// App — корневой компонент. Он хранит общее состояние
-// и передаёт его дочерним компонентам через props.
-//
-// useState(initialValue) — хук React.
-// Возвращает [текущееЗначение, функцияДляИзменения].
-// При вызове setX(...) React перерендерит компонент.
-
 export default function App() {
-  // refreshKey нужен чтобы перерисовать левую панель
-  // когда пользователь выбирает/убирает элемент
-  const [refreshKey, setRefreshKey] = useState(0)
+  const [leftKey, setLeftKey]   = useState(0)
+  const [rightKey, setRightKey] = useState(0)
 
-  function triggerRefresh() {
-    setRefreshKey(k => k + 1)
-  }
+  const refreshLeft  = useCallback(() => setLeftKey(k => k + 1), [])
+  const refreshRight = useCallback(() => setRightKey(k => k + 1), [])
+  const refreshBoth  = useCallback(() => {
+    setLeftKey(k => k + 1)
+    setRightKey(k => k + 1)
+  }, [])
 
   return (
     <div className="app-layout">
-      <LeftPanel key={refreshKey} onSelect={triggerRefresh} />
-      <RightPanel onDeselect={triggerRefresh} />
+      <LeftPanel  key={leftKey}  onSelect={refreshBoth} />
+      <RightPanel key={rightKey} onDeselect={refreshBoth} />
     </div>
   )
 }

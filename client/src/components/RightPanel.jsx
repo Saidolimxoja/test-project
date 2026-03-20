@@ -37,32 +37,43 @@ export default function RightPanel({ onDeselect: notifyParent }) {
   const [hasMore, setHasMore] = useState(true)
   const [loading, setLoading] = useState(false)
   const [q, setQ]             = useState('')
-  const loaderRef             = useRef(null)
+  const loaderRef   = useRef(null)
+  const loadingRef  = useRef(false)
+  const cursorRef   = useRef(0)
 
   const sensors = useSensors(useSensor(PointerSensor))
 
   const loadMore = useCallback(async (reset = false) => {
-    if (loading) return
+    if (loadingRef.current) return
+    loadingRef.current = true
     setLoading(true)
-    const currentCursor = reset ? 0 : cursor
-    const data = await fetchSelected({ cursor: currentCursor, limit: 20, q })
-    setItems(prev => reset ? data.items : [...prev, ...data.items])
-    setCursor(data.nextCursor)
-    setHasMore(data.items.length === 20)
-    setLoading(false)
-  }, [cursor, loading, q])
 
-  useEffect(() => { loadMore(true) }, [q]) // eslint-disable-line
+    const cur = reset ? 0 : cursorRef.current
+    const data = await fetchSelected({ cursor: cur, limit: 20, q })
+
+    setItems(prev => reset ? data.items : [...prev, ...data.items])
+    cursorRef.current = cur + data.items.length
+    setCursor(cursorRef.current)
+    setHasMore(data.items.length === 20)
+
+    loadingRef.current = false
+    setLoading(false)
+  }, [q])
+
+  useEffect(() => {
+    cursorRef.current = 0
+    loadMore(true)
+  }, [q]) // eslint-disable-line
 
   useEffect(() => {
     const el = loaderRef.current
     if (!el) return
     const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore && !loading) loadMore()
+      if (entries[0].isIntersecting && !loadingRef.current) loadMore()
     }, { threshold: 0.1 })
     observer.observe(el)
     return () => observer.disconnect()
-  }, [hasMore, loading, loadMore])
+  }, [loadMore])
 
   async function handleDeselect(id) {
     await deselectItem(id)
